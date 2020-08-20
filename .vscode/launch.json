@@ -31,11 +31,12 @@
     {
       "name": "Office Online (Edge)",
       "type": "edge",
-      "request": "launch",
+      "request": "attach",
+      "port": 9222,
       // To debug your Add-in:
       // 1. When prompted, enter the url (share link) to an Office Online document.
       // 2. Sideload your Add-in. https://docs.microsoft.com/en-us/office/dev/add-ins/testing/sideload-office-add-ins-for-testing
-      "url": "${input:officeOnlineDocumentUrl}",
+      "urlFilter": "${input:officeOnlineDocumentUrl}",
       "webRoot": "${workspaceFolder}",
       "preLaunchTask": "Debug: Web"
     }

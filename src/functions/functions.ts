@@ -1,11 +1,14 @@
 ﻿import { HubConnection, HubConnectionBuilder, HttpTransportType, LogLevel, MessageType } from '@aspnet/signalr'
 import { Url } from 'url';
+import {v4 as uuid } from 'uuid';
 
-let signalRTokenEndpoint = "https://excelcf.azurewebsites.net/api/NegotiateSignalR?code=PREakYerAygMyKaI9l9nsHmWKdluF8N4sZFNDXXvazDryTxn/CCqkg==";
-let cloudFancyEndpoint = "https://excelcf.azurewebsites.net/api/Fancy";
-let cloudFancyAuth = "7by0/NvjPkmLDcG0K8oyhUYm0EEpUK4gqe0qnWEfhZy6bfkL47NtXg==";
-let cloudAddEndpoint = "https://excelcf.azurewebsites.net/api/Add";
-let cloudAddAuth = "MHf9DoteE5eUSgOnf1du8DaDIDRbnEgL/iY3X920nVj5xu9nWSQkWA==";
+const signalRTokenEndpoint:string = "https://excelcf.azurewebsites.net/api/NegotiateSignalR?code=PREakYerAygMyKaI9l9nsHmWKdluF8N4sZFNDXXvazDryTxn/CCqkg==";
+const cloudFancyEndpoint:string = "https://excelcf.azurewebsites.net/api/Fancy";
+const cloudFancyAuth:string = "7by0/NvjPkmLDcG0K8oyhUYm0EEpUK4gqe0qnWEfhZy6bfkL47NtXg==";
+const cloudAddEndpoint:string = "https://excelcf.azurewebsites.net/api/Add";
+const cloudAddAuth:string = "MHf9DoteE5eUSgOnf1du8DaDIDRbnEgL/iY3X920nVj5xu9nWSQkWA==";
+const apikey:string = "a0e2fa30075c4eac870f368f7316e5e3";
+const endpoint:string = "https://api.cognitive.microsofttranslator.com/";
 
 /**
  * Adds two numbers.
@@ -97,23 +100,23 @@ export function logMessage(message: string): string {
   return message;
 }
 
-async function onAzure(url: string, body: object = null, parameters: Record<string, string> = null, auth: string = null): Promise<number> {
+async function onAzure(url: string, body?: object, parameters?: Record<string, string>, auth?: string): Promise<number> {
   let headers = new Headers();
   headers.set("Content-Type", "application/json");
-  if(auth != null) {
+  if(auth !== null) {
     headers.set('x-functions-key', auth);
   }
   let fetchOptions: RequestInit = {
-    method: body != null ? 'post' : 'get',
+    method: body !== null ? 'post' : 'get',
     mode: 'cors',
     cache: 'no-cache',
     redirect: 'follow',
     referrerPolicy: 'no-referrer',
     headers: headers,
-    body: body != null ? JSON.stringify(body) : null
+    body: body !== null ? JSON.stringify(body) : null
   };
   let requestUrl = new URL(url);
-  if(parameters != null) {
+  if(parameters !== null) {
     let searchParams = new URLSearchParams(parameters);
     requestUrl.search = searchParams.toString();
   }
@@ -124,7 +127,7 @@ async function onAzure(url: string, body: object = null, parameters: Record<stri
 /**
  * Displays the current time once a second.
  * @customfunction CONNECT_TO_SIGNALR
- * @param invocation Custom function handler
+ * @param channel channel to connect to
  */
 export async function initSignalR(channel: string, invocation: CustomFunctions.StreamingInvocation<string>) {
   try {
@@ -156,5 +159,76 @@ async function getSignalRInfo() {
   }
   catch (error) {
     return console.log(error);
+  }
+}
+
+/**
+ * Translate a Term using Microsoft Translate.
+ * @customfunction translate
+ * @param term Term to be translated
+ * @param from original language of the Term
+ * @param to language to which the Term is translated to
+ * @returns Translated Term
+ */
+
+export async function translate(term: string, from: string, to: string): Promise<string> {
+  const url = endpoint + "translate?api-version=3.0&to=" + to + "&from=" + from;
+  const body = JSON.stringify([{ text: term }]);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      body: body,
+      headers: {
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": apikey,
+        "X-ClientTraceId": uuid().toString(),
+        "Ocp-Apim-Subscription-Region": "westeurope"
+      }
+    });
+    const data = await res.json();
+    console.log(data);
+    if(data.error) {
+      throw data.error.message;
+    }
+    return data[0].translations[0].text;
+  } catch(error) {
+    console.log(error);
+    let errorT = typeof(error);
+    throw error;
+    return "error";
+  }
+}
+
+/**
+ * Translate a Term using Microsoft Translate (auto detect from).
+ * @customfunction translate_AUTO
+ * @param term Term to be translated
+ * @param to language to which the Term is translated to
+ */
+
+export async function translateAuto(term: string, to: string): Promise<string> {
+  const url = endpoint + "translate?api-version=3.0&to=" + to ;
+  const body = JSON.stringify([{ text: term }]);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      body: body,
+      headers: {
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": apikey,
+        "X-ClientTraceId": uuid().toString(),
+        "Ocp-Apim-Subscription-Region": "westeurope"
+      }
+    });
+    const data = await res.json();
+    console.log(data);
+    if(data.error) {
+      return data.error.message;
+    }
+    return data[0].translations[0].text;
+  } catch(error) {
+    console.log(error);
+    let errorT = typeof(error);
+    throw error;
   }
 }

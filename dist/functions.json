@@ -109,7 +109,53 @@
             },
             "parameters": [
                 {
+                    "description": "channel to connect to",
                     "name": "channel",
+                    "type": "string"
+                }
+            ],
+            "result": {
+                "type": "string"
+            }
+        },
+        {
+            "description": "Translate a Term using Microsoft Translate.",
+            "id": "TRANSLATE",
+            "name": "TRANSLATE",
+            "parameters": [
+                {
+                    "description": "Term to be translated",
+                    "name": "term",
+                    "type": "string"
+                },
+                {
+                    "description": "original language of the Term",
+                    "name": "from",
+                    "type": "string"
+                },
+                {
+                    "description": "language to which the Term is translated to",
+                    "name": "to",
+                    "type": "string"
+                }
+            ],
+            "result": {
+                "type": "string"
+            }
+        },
+        {
+            "description": "Translate a Term using Microsoft Translate (auto detect from).",
+            "id": "TRANSLATE_AUTO",
+            "name": "TRANSLATE_AUTO",
+            "parameters": [
+                {
+                    "description": "Term to be translated",
+                    "name": "term",
+                    "type": "string"
+                },
+                {
+                    "description": "language to which the Term is translated to",
+                    "name": "to",
                     "type": "string"
                 }
             ],
