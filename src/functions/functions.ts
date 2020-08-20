@@ -29,7 +29,7 @@ export function add(first: number, second: number): number {
  */
 
 export async function cloud_add(first: number, second: number): Promise<number> {
-  return await onAzure(cloudAddEndpoint, null, {first: first.toString(), second: second.toString()}, new Headers([['x-functions-code', cloudAddAuth ]]));
+  return await onAzure(cloudAddEndpoint, null, {first: first.toString(), second: second.toString()}, cloudAddAuth);
 }
 
 /**
@@ -40,7 +40,7 @@ export async function cloud_add(first: number, second: number): Promise<number> 
  */
 
 export async function fancy_fact(num: number): Promise<number> {
-  return await onAzure(cloudFancyEndpoint, null, {number: num.toString() }, new Headers([['x-functions-code', cloudFancyAuth ]]));
+  return await onAzure(cloudFancyEndpoint, null, {number: num.toString() }, cloudFancyAuth);
 }
 
 /**
@@ -97,11 +97,12 @@ export function logMessage(message: string): string {
   return message;
 }
 
-async function onAzure(url: string, body: object = null, parameters: Record<string, string> = null, headers: Headers = null): Promise<number> {
-  if(headers == null) {
-    headers = new Headers();
-  }
+async function onAzure(url: string, body: object = null, parameters: Record<string, string> = null, auth: string = null): Promise<number> {
+  let headers = new Headers();
   headers.set("Content-Type", "application/json");
+  if(auth != null) {
+    headers.set('x-functions-key', auth);
+  }
   let fetchOptions: RequestInit = {
     method: body != null ? 'post' : 'get',
     mode: 'cors',
